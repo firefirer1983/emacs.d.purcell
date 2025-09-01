@@ -40,6 +40,7 @@
 (require 'init-site-lisp) ;; Must come before elpa, as it may provide package.el
 ;; Calls (package-initialize)
 (require 'init-elpa)      ;; Machinery for installing required packages
+(require 'init-elpa-mirror)
 (require 'init-exec-path) ;; Set up $PATH
 
 
@@ -71,11 +72,14 @@
 (require 'init-grep)
 (require 'init-uniquify)
 (require 'init-ibuffer)
-(require 'init-flymake)
+;; (require 'init-flymake)
+(require 'init-flycheck)
 (require 'init-eglot)
 
 (require 'init-recentf)
 (require 'init-minibuffer)
+(require 'init-consult)
+
 (require 'init-hippie-expand)
 (require 'init-corfu)
 (require 'init-windows)
@@ -107,6 +111,7 @@
 (require 'init-haml)
 (require 'init-http)
 (require 'init-python)
+(require 'init-pyvenv)
 (require 'init-haskell)
 (require 'init-elm)
 (require 'init-purescript)
