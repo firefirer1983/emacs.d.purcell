@@ -12,7 +12,7 @@
 
 (add-hook 'typescript-ts-mode-hook #'eglot-ensure)
 
-
+(add-hook 'go-ts-mode-hook #'eglot-ensure)
 ;; 不要多余的行的提示导致显示错位
 (remove-hook 'after-init-hook 'global-diff-hl-mode)
 
@@ -90,9 +90,27 @@
                 ("SConscript\\'" . python-ts-mode))
               auto-mode-alist))
 
-(provide 'init-local)
 
 ;; Program mode use subword
 (add-hook 'prog-mode-hook 'subword-mode)
 
+;; ======================= MC multi editing ======================
+(global-unset-key (kbd "C-M-n"))
+(global-set-key (kbd "C-M-n") 'mc/mark-next-like-this)
+
+;; 纯终端环境：Emacs 复制内容自动同步到 Tmux 剪贴板
+
+(defun my/copy-to-tmux (text)
+  "Copy TEXT from Emacs to tmux clipboard."
+  (when (and text (getenv "TMUX"))
+    (with-temp-buffer
+      (insert text)
+      ;; 把 Emacs 文本写入 tmux buffer
+      (call-process-region (point-min) (point-max)
+                           "tmux" nil 0 nil "load-buffer" "-"))))
+
+
+(setq interprogram-cut-function 'my/copy-to-tmux)
+
 ;;; init-local.el ends here
+(provide 'init-local)
