@@ -30,6 +30,12 @@
   (add-hook 'flymake-mode-hook
             (lambda ()
               (add-hook 'eldoc-documentation-functions 'flymake-eldoc-function nil t))))
+
+(require 'flymake-pyrefly)
+;; ;; or if you use eglot
+(add-hook 'eglot-managed-mode-hook #'pyrefly-setup-flymake-backend)
+;;; init-local.el ends here
+
 (setq flymake-indicator-type 'fringes)
 (provide 'init-flymake)
 ;;; init-flymake.el ends here

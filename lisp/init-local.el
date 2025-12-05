@@ -120,9 +120,5 @@
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
                `((python-ts-mode python-mode) . ("pyrefly" "lsp"))))
-(require 'flymake-pyrefly)
-;; ;; or if you use eglot
-(add-hook 'eglot-managed-mode-hook #'pyrefly-setup-flymake-backend)
-;;; init-local.el ends here
 
 (provide 'init-local)
