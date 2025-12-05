@@ -98,6 +98,7 @@
 (global-unset-key (kbd "C-M-n"))
 (global-set-key (kbd "C-M-n") 'mc/mark-next-like-this)
 
+;; ====================== clipboard emacs to tmux ================
 ;; 纯终端环境：Emacs 复制内容自动同步到 Tmux 剪贴板
 
 (defun my/copy-to-tmux (text)
@@ -112,5 +113,16 @@
 
 (setq interprogram-cut-function 'my/copy-to-tmux)
 
+;; ====================== vertico setting ================
+(add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
+(global-set-key (kbd "M-s p") 'vertico-repeat)
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               `((python-ts-mode python-mode) . ("pyrefly" "lsp"))))
+(require 'flymake-pyrefly)
+;; ;; or if you use eglot
+(add-hook 'eglot-managed-mode-hook #'pyrefly-setup-flymake-backend)
 ;;; init-local.el ends here
+
 (provide 'init-local)

@@ -72,8 +72,8 @@
 (require 'init-grep)
 (require 'init-uniquify)
 (require 'init-ibuffer)
-;; (require 'init-flymake)
-(require 'init-flycheck)
+(require 'init-flymake)
+;; (require 'init-flycheck)
 (require 'init-eglot)
 
 (require 'init-recentf)
@@ -156,6 +156,7 @@
 (require 'init-terminals)
 
 ;; Extra packages which don't require any configuration
+;; (require 'init-tailwindcss)
 
 (require-package 'sudo-edit)
 (maybe-require-package 'gnuplot)

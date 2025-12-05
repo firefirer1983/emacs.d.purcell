@@ -30,6 +30,6 @@
   (add-hook 'flymake-mode-hook
             (lambda ()
               (add-hook 'eldoc-documentation-functions 'flymake-eldoc-function nil t))))
-
+(setq flymake-indicator-type 'fringes)
 (provide 'init-flymake)
 ;;; init-flymake.el ends here
