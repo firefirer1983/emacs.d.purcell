@@ -155,6 +155,12 @@
 (require 'init-zig)
 (require 'init-terminals)
 
+
+(require 'init-agent)
+(require 'init-yasnippet)
+(require 'init-vterm)
+
+
 ;; Extra packages which don't require any configuration
 ;; (require 'init-tailwindcss)
 

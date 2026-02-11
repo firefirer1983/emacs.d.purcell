@@ -221,6 +221,7 @@
 
 (add-hook 'window-size-change-functions 'my-auto-split-window)
 
-
+;;;; global-auto-revert-mode
+(setq global-auto-revert-mode t)
 (provide 'init-local)
 ;;; init-local.el ends here
