@@ -223,5 +223,11 @@
 
 ;;;; global-auto-revert-mode
 (setq global-auto-revert-mode t)
+
+;;;; magit buffer not fullscreen
+(add-to-list 'display-buffer-alist
+             (cons (cons 'major-mode 'magit-status-mode)
+                   '(display-buffer-reuse-window display-buffer-pop-up-window)))
+
 (provide 'init-local)
 ;;; init-local.el ends here
