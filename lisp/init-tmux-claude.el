@@ -2,6 +2,20 @@
 ;;; Commentary:
 ;;; Code:
 
+;; Get current tmux info from frame parameter or env var
+;; Frame parameter format (from emacsclient): "session:window:pane"
+;; TMUX env var format: "/tmp/tmux-1000/default,2944363,4" (legacy, unreliable)
+(defun my/tmux-parse-env ()
+  "Parse tmux info from frame parameter.
+Returns (cons session window)."
+  ;; Get from frame parameter (set by emacsclient --frame-parameters)
+  (let ((frame-tmux (frame-parameter nil 'tmux-id)))
+    (when frame-tmux
+      (let ((parts (split-string frame-tmux ":")))
+        (when (= (length parts) 3)
+          (cons (car parts)    ; session
+                (cadr parts))))))) ; window
+
 ;; Get current tmux pane info
 (defun my/tmux-current-pane ()
   "Get current tmux pane ID (e.g., '0' or '1')."
@@ -11,14 +25,16 @@
 ;; Get current tmux window index
 (defun my/tmux-current-window ()
   "Get current tmux window index."
-  (string-trim
-   (shell-command-to-string "tmux display-message -p '#{window_index}'")))
+  (or (cdr (my/tmux-parse-env))
+      (string-trim
+       (shell-command-to-string "tmux display-message -p '#{window_index}'"))))
 
 ;; Get current tmux session name
 (defun my/tmux-session-name ()
   "Get current tmux session name."
-  (string-trim
-   (shell-command-to-string "tmux display-message -p '#{session_name}'")))
+  (or (car (my/tmux-parse-env))
+      (string-trim
+       (shell-command-to-string "tmux display-message -p '#{session_name}'"))))
 
 ;; Find the other pane in the same window
 (defun my/tmux-other-pane ()
@@ -49,10 +65,9 @@ If there are multiple panes, prompt user to select one."
   (let* ((session (my/tmux-session-name))
          (window (my/tmux-current-window))
          (target (format "%s:%s.%s" session window target-pane))
-         (cmd (format "tmux set-buffer \"%s\" && tmux paste-buffer -t '%s' && tmux select-pane -t '%s'"
+         (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s' && tmux select-pane -t '%s'"
                       text target target)))
-    (shell-command cmd)
-    (message "Sent to tmux %s" text)))
+    (shell-command cmd)))
 
 ;; Core function: send region + prompt to tmux Claude
 (defun my/tmux-claude-send (prompt region-text &optional file-path region-info)
@@ -62,7 +77,9 @@ If FILE-PATH is provided, include it in the context.
 If REGION-INFO is provided, include line numbers in the context."
   (unless (getenv "TMUX")
     (error "Not running in tmux"))
-  (let* ((target-pane (my/tmux-other-pane))
+  (let* ((session (my/tmux-session-name))
+         (window (my/tmux-current-window))
+         (target-pane (my/tmux-other-pane))
          (context-header (cond
                           ((and file-path region-info)
                            (format "File: %s (%s)" file-path region-info))
@@ -80,7 +97,7 @@ If REGION-INFO is provided, include line numbers in the context."
         (progn
           (my/tmux-send-text target-pane full-text)
           (deactivate-mark))
-      (error "No other pane found in window %s" (my/tmux-current-window)))))
+      (error "No other pane found in window %s" window))))
 
 ;; Interactive command
 (defun my/send-prompt-to-tmux-claude ()
@@ -142,6 +159,8 @@ in the other pane with a prompt to inspect the code."
 ;; Bind key
 (global-set-key (kbd "C-c p") 'my/send-prompt-to-tmux-claude)
 (global-set-key (kbd "C-c i") 'my/send-inspect-req-to-tmux-claude)
+
+;; Record tmux info when creating new frame (for emacsclient)
 
 (provide 'init-tmux-claude)
 ;;; init-tmux-claude.el ends here
