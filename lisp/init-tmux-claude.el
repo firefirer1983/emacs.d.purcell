@@ -32,7 +32,7 @@ If there are multiple panes, prompt user to select one."
                           session window)))
          (panes (delq nil (mapcar (lambda (s) (unless (string= s "") s))
                                   (split-string output "\n" t))))
-         (other-panes (delete current-pane panes)))
+         (other-panes (cl-delete current-pane panes :test #'string=)))
     (cond
      ((null other-panes)
       (error "No other pane found"))
@@ -83,7 +83,7 @@ If REGION-INFO is provided, include line numbers in the context."
       (error "No other pane found in window %s" (my/tmux-current-window)))))
 
 ;; Interactive command
-(defun my/send-to-tmux-claude ()
+(defun my/send-prompt-to-tmux-claude ()
   "Send region text with prompt to tmux Claude.
 
 1. Get selected region as additional context
@@ -105,6 +105,26 @@ If REGION-INFO is provided, include line numbers in the context."
          (prompt (read-from-minibuffer "Prompt: ")))
     (my/tmux-claude-send prompt region-text file-path region-info)))
 
+;; Interactive command: send region to Claude for implementation
+(defun my/send-inspect-req-to-tmux-claude ()
+  "Send selected region to tmux Claude for inspection.
+
+Get selected region as code to inspect and send to tmux Claude
+in the other pane with a prompt to inspect the code."
+  (interactive)
+  (unless (use-region-p)
+    (error "No region selected"))
+  (let* ((file-path (when buffer-file-name (abbreviate-file-name buffer-file-name)))
+         (region-beg (region-beginning))
+         (region-end (region-end))
+         (line-beg (line-number-at-pos region-beg))
+         (line-end (line-number-at-pos region-end))
+         (region-info (format "Lines %d-%d" line-beg line-end))
+         (region-text (buffer-substring region-beg region-end))
+         (prompt "请检查和详细解释以下代码:\n"))
+    (my/tmux-claude-send prompt region-text file-path region-info)))
+
+
 ;; Simple test function
 (defun my/tmux-test-send (text)
   "Test: send TEXT to other pane in current tmux window."
@@ -118,8 +138,10 @@ If REGION-INFO is provided, include line numbers in the context."
     (shell-command cmd)
     (message "Test: sent to %s" target)))
 
+
 ;; Bind key
-(global-set-key (kbd "C-c s") 'my/send-to-tmux-claude)
+(global-set-key (kbd "C-c p") 'my/send-prompt-to-tmux-claude)
+(global-set-key (kbd "C-c i") 'my/send-inspect-req-to-tmux-claude)
 
 (provide 'init-tmux-claude)
 ;;; init-tmux-claude.el ends here
