@@ -1,5 +1,6 @@
-;; -*-no-byte-compile: t; -*-
 ;;; init-tmux-claude.el --- Send region + prompt to tmux Claude -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
 
 ;; Get current tmux pane info
 (defun my/tmux-current-pane ()
