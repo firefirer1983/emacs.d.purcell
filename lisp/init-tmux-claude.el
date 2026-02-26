@@ -21,16 +21,26 @@
 
 ;; Find the other pane in the same window
 (defun my/tmux-other-pane ()
-  "Find the other pane in current tmux window (not current pane)."
+  "Find the other pane in current tmux window (not current pane).
+If there are multiple panes, prompt user to select one."
   (let* ((session (my/tmux-session-name))
          (window (my/tmux-current-window))
          (current-pane (my/tmux-current-pane))
          (output (shell-command-to-string
                   (format "tmux list-panes -t %s:%s -F '#{pane_index}'"
                           session window)))
-         (panes (split-string output "\n" t))
+         (panes (delq nil (mapcar (lambda (s) (unless (string= s "") s))
+                                  (split-string output "\n" t))))
          (other-panes (delete current-pane panes)))
-    (car other-panes)))
+    (cond
+     ((null other-panes)
+      (error "No other pane found"))
+     ((= (length other-panes) 1)
+      (car other-panes))
+     (t
+      ;; Show pane numbers briefly (500ms)
+      (shell-command "tmux display-panes -d 750")
+      (completing-read "Select target pane: " other-panes nil t)))))
 
 ;; Send text to tmux target pane
 (defun my/tmux-send-text (target-pane text)
