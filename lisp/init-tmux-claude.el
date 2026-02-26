@@ -36,28 +36,37 @@ Returns (cons session window)."
       (string-trim
        (shell-command-to-string "tmux display-message -p '#{session_name}'"))))
 
-;; Find the other pane in the same window
+;; Find the other pane in the same window that is running Claude
 (defun my/tmux-other-pane ()
-  "Find the other pane in current tmux window (not current pane).
-If there are multiple panes, prompt user to select one."
+  "Find the other pane in current tmux window running Claude (not current pane).
+If there are multiple Claude panes, prompt user to select one."
   (let* ((session (my/tmux-session-name))
          (window (my/tmux-current-window))
          (current-pane (my/tmux-current-pane))
+         ;; Get pane index and command for each pane
          (output (shell-command-to-string
-                  (format "tmux list-panes -t %s:%s -F '#{pane_index}'"
+                  (format "tmux list-panes -t %s:%s -F '#{pane_index}|#{pane_current_command}'"
                           session window)))
-         (panes (delq nil (mapcar (lambda (s) (unless (string= s "") s))
-                                  (split-string output "\n" t))))
-         (other-panes (cl-delete current-pane panes :test #'string=)))
+         (panes-list (delq nil (mapcar (lambda (s)
+                                          (unless (string= s "")
+                                            (split-string s "|" t)))
+                                        (split-string output "\n" t))))
+         ;; Filter to only panes running Claude (case insensitive)
+         (claude-panes (cl-loop for (idx cmd) in panes-list
+                                when (and (stringp idx)
+                                          (stringp cmd)
+                                          (string-match-p (regexp-opt '("claude" "Claude") t) cmd))
+                                collect idx))
+         (other-panes (cl-delete current-pane claude-panes :test #'string=)))
     (cond
      ((null other-panes)
-      (error "No other pane found"))
+      (error "No Claude pane found"))
      ((= (length other-panes) 1)
       (car other-panes))
      (t
       ;; Show pane numbers briefly (500ms)
       (shell-command "tmux display-panes -d 750")
-      (completing-read "Select target pane: " other-panes nil t)))))
+      (completing-read "Select Claude pane: " other-panes nil t)))))
 
 ;; Send text to tmux target pane
 (defun my/tmux-send-text (target-pane text)
