@@ -17,10 +17,11 @@ Returns (cons session window)."
                 (cadr parts))))))) ; window
 
 ;; Get current tmux pane info
-(defun my/tmux-current-pane ()
-  "Get current tmux pane ID (e.g., '0' or '1')."
-  (string-trim
-   (shell-command-to-string "tmux display-message -p '#{pane_index}'")))
+;; (defun my/tmux-current-pane ()
+;;   "Get current tmux pane ID (e.g., '0' or '1')."
+;;   (string-trim
+;;    (shell-command-to-string "tmux display-message -p '#{pane_index}'")))
+(message "%s:%s" (car (my/tmux-parse-env)) (cdr (my/tmux-parse-env)))
 
 ;; Get current tmux window index
 (defun my/tmux-current-window ()
@@ -36,28 +37,31 @@ Returns (cons session window)."
       (string-trim
        (shell-command-to-string "tmux display-message -p '#{session_name}'"))))
 
+
+(message (format "%s:%s:%s" (my/tmux-session-name) (my/tmux-current-window)))
+
+
 ;; Find the other pane in the same window that is running Claude
 (defun my/tmux-other-pane ()
   "Find the other pane in current tmux window running Claude (not current pane).
 If there are multiple Claude panes, prompt user to select one."
   (let* ((session (my/tmux-session-name))
          (window (my/tmux-current-window))
-         (current-pane (my/tmux-current-pane))
          ;; Get pane index and command for each pane
          (output (shell-command-to-string
                   (format "tmux list-panes -t %s:%s -F '#{pane_index}|#{pane_current_command}'"
                           session window)))
          (panes-list (delq nil (mapcar (lambda (s)
-                                          (unless (string= s "")
-                                            (split-string s "|" t)))
-                                        (split-string output "\n" t))))
+                                         (unless (string= s "")
+                                           (split-string s "|" t)))
+                                       (split-string output "\n" t))))
          ;; Filter to only panes running Claude (case insensitive)
          (claude-panes (cl-loop for (idx cmd) in panes-list
                                 when (and (stringp idx)
                                           (stringp cmd)
                                           (string-match-p (regexp-opt '("claude" "Claude") t) cmd))
                                 collect idx))
-         (other-panes (cl-delete current-pane claude-panes :test #'string=)))
+         (other-panes (cl-delete claude-panes :test #'string=)))
     (cond
      ((null other-panes)
       (error "No Claude pane found"))
@@ -69,14 +73,24 @@ If there are multiple Claude panes, prompt user to select one."
       (completing-read "Select Claude pane: " other-panes nil t)))))
 
 ;; Send text to tmux target pane
+;; (defun my/tmux-send-text (target-pane text)
+;;   "Send TEXT to tmux TARGET-PANE and switch focus to that pane."
+;;   (let* ((session (my/tmux-session-name))
+;;          (window (my/tmux-current-window))
+;;          (target (format "%s:%s.%s" session window target-pane))
+;;          (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s' && tmux select-pane -t '%s'"
+;;                       text target target)))
+;;     (shell-command cmd)))
+
 (defun my/tmux-send-text (target-pane text)
   "Send TEXT to tmux TARGET-PANE and switch focus to that pane."
   (let* ((session (my/tmux-session-name))
          (window (my/tmux-current-window))
          (target (format "%s:%s.%s" session window target-pane))
-         (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s' && tmux select-pane -t '%s'"
-                      text target target)))
+         (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s'"
+                      text target)))
     (shell-command cmd)))
+
 
 ;; Core function: send region + prompt to tmux Claude
 (defun my/tmux-claude-send (prompt region-text &optional file-path region-info)
