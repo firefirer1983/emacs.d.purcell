@@ -151,23 +151,8 @@ in the other pane with a prompt to inspect the code."
     (my/tmux-claude-send prompt region-text file-path region-info)))
 
 
-;; Simple test function
-(defun my/tmux-test-send (text)
-  "Test: send TEXT to other pane in current tmux window."
-  (interactive "sText to send: ")
-  (let* ((session (my/tmux-session-name))
-         (window (my/tmux-current-window))
-         (other-pane (my/tmux-other-pane))
-         (target (format "%s:%s.%s" session window other-pane))
-         (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s'"
-                      text target)))
-    (shell-command cmd)
-    (message "Test: sent to %s" target)))
-
-
 ;; Bind key
-(global-set-key (kbd "C-c p") 'my/send-prompt-to-tmux-claude)
-(global-set-key (kbd "C-c i") 'my/send-inspect-req-to-tmux-claude)
+(global-set-key (kbd "C-c '") 'my/send-prompt-to-tmux-claude)
 
 ;; Record tmux info when creating new frame (for emacsclient)
 
