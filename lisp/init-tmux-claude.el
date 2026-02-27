@@ -16,12 +16,6 @@ Returns (cons session window)."
           (cons (car parts)    ; session
                 (cadr parts))))))) ; window
 
-;; Get current tmux pane info
-;; (defun my/tmux-current-pane ()
-;;   "Get current tmux pane ID (e.g., '0' or '1')."
-;;   (string-trim
-;;    (shell-command-to-string "tmux display-message -p '#{pane_index}'")))
-(message "%s:%s" (car (my/tmux-parse-env)) (cdr (my/tmux-parse-env)))
 
 ;; Get current tmux window index
 (defun my/tmux-current-window ()
@@ -36,9 +30,6 @@ Returns (cons session window)."
   (or (car (my/tmux-parse-env))
       (string-trim
        (shell-command-to-string "tmux display-message -p '#{session_name}'"))))
-
-
-(message (format "%s:%s:%s" (my/tmux-session-name) (my/tmux-current-window)))
 
 
 ;; Find the other pane in the same window that is running Claude
@@ -61,34 +52,28 @@ If there are multiple Claude panes, prompt user to select one."
                                           (stringp cmd)
                                           (string-match-p (regexp-opt '("claude" "Claude") t) cmd))
                                 collect idx))
-         (other-panes (cl-delete claude-panes :test #'string=)))
+         )
     (cond
-     ((null other-panes)
+     ((null claude-panes)
       (error "No Claude pane found"))
-     ((= (length other-panes) 1)
-      (car other-panes))
+     ((= (length claude-panes) 1)
+      (car claude-panes))
      (t
       ;; Show pane numbers briefly (500ms)
       (shell-command "tmux display-panes -d 750")
-      (completing-read "Select Claude pane: " other-panes nil t)))))
+      (completing-read "Select Claude pane: " claude-panes nil t)))))
+
+
+(my/tmux-other-pane)
 
 ;; Send text to tmux target pane
-;; (defun my/tmux-send-text (target-pane text)
-;;   "Send TEXT to tmux TARGET-PANE and switch focus to that pane."
-;;   (let* ((session (my/tmux-session-name))
-;;          (window (my/tmux-current-window))
-;;          (target (format "%s:%s.%s" session window target-pane))
-;;          (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s' && tmux select-pane -t '%s'"
-;;                       text target target)))
-;;     (shell-command cmd)))
-
 (defun my/tmux-send-text (target-pane text)
   "Send TEXT to tmux TARGET-PANE and switch focus to that pane."
   (let* ((session (my/tmux-session-name))
          (window (my/tmux-current-window))
          (target (format "%s:%s.%s" session window target-pane))
-         (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s'"
-                      text target)))
+         (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s' && tmux select-pane -t '%s'"
+                      text target target)))
     (shell-command cmd)))
 
 
