@@ -12,7 +12,6 @@
 
 (add-hook 'typescript-ts-mode-hook #'eglot-ensure)
 
-(add-hook 'go-ts-mode-hook #'eglot-ensure)
 ;; 不要多余的行的提示导致显示错位
 (remove-hook 'after-init-hook 'global-diff-hl-mode)
 
@@ -135,13 +134,13 @@
 
 ;; ===================== Python Setting ========================
 
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               `((python-ts-mode python-mode) . ("ty" "server"))))
-
 ;; (with-eval-after-load 'eglot
 ;;   (add-to-list 'eglot-server-programs
-;;                `((python-ts-mode python-mode) . ("pyrefly" "lsp"))))
+;;                `((python-ts-mode python-mode) . ("ty" "server"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               `((python-ts-mode python-mode) . ("pyrefly" "lsp"))))
 
 
 ;; (with-eval-after-load 'eglot
@@ -153,7 +152,12 @@
 ;;                `((python-ts-mode python-mode) . ("pyright-langserver" "--stdio"))))
 
 ;; ==================== GO Setting ==============================
-(add-hook 'go-mode-hook (lambda () (setq tab-width 4)))
+(add-hook 'go-ts-mode-hook (lambda () (progn (setq tab-width 4)
+                                             (add-hook 'before-save-hook #'eglot-format-buffer)
+                                             (setq gofmt-command "goimports")
+                                             )))
+(add-hook 'go-ts-mode-hook #'eglot-ensure)
+
 
 ;; ==================== Rust Setting ==============================
 (add-hook 'rust-mode-hook 'eglot-ensure)
@@ -228,6 +232,61 @@
 (add-to-list 'display-buffer-alist
              (cons (cons 'major-mode 'magit-status-mode)
                    '(display-buffer-reuse-window display-buffer-pop-up-window)))
+
+
+;;;; xref in othter window
+(add-to-list 'display-buffer-alist
+             '("\\*xref\\*"
+               (display-buffer-in-previous-window)
+               (inhibit-same-window . t)))
+
+(require 'auto-dim-other-buffers)
+(set-face-background 'auto-dim-other-buffers-face "#302a30")
+(add-hook 'after-init-hook 'auto-dim-other-buffers-mode)
+
+
+(defun my/set-vertical-border ()
+  (interactive)
+  (set-face-background 'vertical-border "#262626")
+  (set-face-foreground 'vertical-border "#262626")
+  (message "set vertical border"))
+;; (my/set-vertical-border)
+(add-hook 'after-init-hook #'my/set-vertical-border)
+;;;; 中间界限的简化
+
+
+;; (window-divider-mode 1)
+;; (setq window-divider-default-right-width 0)
+;; (setq window-divider-default-places 'right-only)
+
+;; (set-display-table-slot standard-display-table
+;;                         'vertical-border
+;;                         (make-glyph-code ?\u200b))
+
+;;;; consult-imenu 优化
+;; (setq consult-imenu-config
+;;       '((emacs-lisp-mode :toplevel "Symbol"
+;;                          :types ((?f "Function" font-lock-function-name-face)
+;;                                  (?v "Variable" font-lock-variable-name-face)
+;;                                  (?v "Variable" font-lock-variable-name-face)))
+;;         ;; 為其他模式添加通用配置
+;;         (t :toplevel "Symbol"
+;;            :types ((?f "Function"  font-lock-function-name-face)
+;;                    (?c "Class"     font-lock-type-face)
+;;                    (?v "Variable"  font-lock-variable-name-face)
+;;                    (?m "Method"    font-lock-function-name-face)
+;;                    (?s "Struct"    font-lock-type-face)))))
+
+(setq consult-imenu-config
+      '(
+        ;; 為其他模式添加通用配置
+        (t :toplevel "Symbol"
+           :types ((?f "Function"  font-lock-function-name-face)
+                   (?c "Class"     font-lock-type-face)
+                   (?v "Variable"  font-lock-variable-name-face)
+                   (?m "Method"    font-lock-function-name-face)
+                   (?s "Struct"    font-lock-type-face)))))
+
 
 (provide 'init-local)
 ;;; init-local.el ends here

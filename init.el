@@ -108,6 +108,7 @@
 (require 'init-nxml)
 (require 'init-html)
 (require 'init-css)
+(require 'init-vue)
 (require 'init-haml)
 (require 'init-http)
 (require 'init-python)

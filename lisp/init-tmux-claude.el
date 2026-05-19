@@ -64,15 +64,15 @@ If there are multiple Claude panes, prompt user to select one."
       (completing-read "Select Claude pane: " claude-panes nil t)))))
 
 
-(my/tmux-other-pane)
+;; (my/tmux-other-pane)
 
 ;; Send text to tmux target pane
 (defun my/tmux-send-text (target-pane text)
-  "Send TEXT to tmux TARGET-PANE and switch focus to that pane."
+  "Send TEXT to tmux TARGET-PANE without switching focus."
   (let* ((session (my/tmux-session-name))
          (window (my/tmux-current-window))
          (target (format "%s:%s.%s" session window target-pane))
-         (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s' && tmux select-pane -t '%s'"
+         (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s' && tmux send-keys -t '%s' Enter"
                       text target target)))
     (shell-command cmd)))
 
