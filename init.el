@@ -108,7 +108,9 @@
 (require 'init-nxml)
 (require 'init-html)
 (require 'init-css)
-(require 'init-vue)
+(when (require 'init-vue nil 'noerror)
+  (message "init-vue loaded successfully"))
+;; (require 'init-vue)
 (require 'init-haml)
 (require 'init-http)
 (require 'init-python)
@@ -156,9 +158,12 @@
 (require 'init-uiua)
 (require 'init-zig)
 (require 'init-terminals)
+(require 'init-crux)
+(require 'init-expand-region)
 
+(when (require 'init-agent nil 'noerror)
+  (message "init-agent loaded successfully"))
 
-(require 'init-agent)
 (require 'init-yasnippet)
 (require 'init-vterm)
 

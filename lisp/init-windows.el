@@ -110,9 +110,15 @@ Call a second time to restore the original window configuration."
 
 
 
-(when (maybe-require-package 'pulsar)
-  (setq-default pulsar-pulse-region-functions nil)
-  (pulsar-global-mode t))
+;; (when (maybe-require-package 'pulsar)
+;;   (setq-default pulsar-pulse-region-functions nil)
+;;   (setq pulsar-face 'pulsar-yellow)
+;;   (setq pulsar-pulse t)
+;;   (setq pulsar-delay 0.055)
+;;   (setq pulsar-iterations 10)
+;;   (setq pulsar-face 'pulsar-yellow)
+;;   (setq pulsar-highlight-face 'pulsar-yellow)
+;;   (pulsar-global-mode t))
 
 (setq-default window-combination-resize t)
 

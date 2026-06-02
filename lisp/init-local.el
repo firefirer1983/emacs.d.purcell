@@ -40,7 +40,7 @@
 ;; 函数内部不需要做颜色提示了
 (setq treesit-font-lock-level 3)
 
-(require 'material-theme)
+(maybe-require-package 'material-theme)
 (load-theme 'material t)
 
 ;; 默认不显示行号
@@ -57,7 +57,7 @@
   (remove-hook 'prog-mode-hook 'display-fill-column-indicator-mode))
 
 ;; 去掉很丑的红色的括号!
-(when (require-package 'rainbow-delimiters)
+(when (maybe-require-package 'rainbow-delimiters)
   (remove-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
 ;; 不需要page break
@@ -69,6 +69,10 @@
 ;; 不需要鼠标，不然会导致putty的鼠标左右键的复制粘贴失效
 (remove-hook 'after-make-console-frame-hooks 'sanityinc/console-frame-setup)
 
+;; ========================= Pulsa ==========================
+;; (setq pulsar-highlight-face 'pulsar-magenta)
+;; (setq pulsar-face 'pulsar-green)
+;; (setq pulsar-region-face 'pulsar-yellow)
 ;; ======================== ZOOM / UNZOOM 当前窗口 ==================
 (defvar-local my-zoomed-p nil
   "记录当前窗口是否处于通过 zoom-window 触发的最大化状态.")
@@ -86,18 +90,16 @@
 
 (global-set-key (kbd "C-x z") 'zoom-current-window)
 ;; ===================== Treesit-Auto ==========================
-(maybe-require-package 'treesit-auto)
-;; 加载treesit-auto包
-(require 'treesit-auto)
+(when (maybe-require-package 'treesit-auto)
+  (require 'treesit-auto)
+  ;; 设置自定义变量：安装语法时提示确认
+  (setq treesit-auto-install 'prompt)
+  ;; 配置：为所有支持的模式添加自动模式关联
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  ;; 启用全局treesit-auto模式
+  (global-treesit-auto-mode t)
+  )
 
-;; 设置自定义变量：安装语法时提示确认
-(setq treesit-auto-install 'prompt)
-
-;; 配置：为所有支持的模式添加自动模式关联
-(treesit-auto-add-to-auto-mode-alist 'all)
-
-;; 启用全局treesit-auto模式
-(global-treesit-auto-mode)
 
 ;; ====================== Python Mode Hook =====================
 (setq auto-mode-alist
@@ -240,9 +242,10 @@
                (display-buffer-in-previous-window)
                (inhibit-same-window . t)))
 
-(require 'auto-dim-other-buffers)
-(set-face-background 'auto-dim-other-buffers-face "#302a30")
-(add-hook 'after-init-hook 'auto-dim-other-buffers-mode)
+(when (maybe-require-package 'auto-dim-other-buffers)
+  (require 'auto-dim-other-buffers)
+  (set-face-background 'auto-dim-other-buffers-face "#302a30")
+  (add-hook 'after-init-hook 'auto-dim-other-buffers-mode))
 
 
 (defun my/set-vertical-border ()
