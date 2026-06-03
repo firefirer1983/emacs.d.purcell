@@ -19,16 +19,31 @@
 (remove-hook 'after-init-hook 'dimmer-mode)
 
 (add-hook 'shell-mode-hook #'eglot-ensure)
-(global-set-key (kbd "C-x o") 'other-window)
-(global-set-key (kbd "C-x C-o") 'other-window)
+(global-set-key (kbd "C-x o") #'other-window)
+(global-set-key (kbd "C-x C-o") #'other-window)
 
-(global-set-key (kbd "C-j") 'join-line)
+(global-set-key (kbd "C-j") #'join-line)
 
 (unbind-key (kbd "C-x C-p"))
 (define-key global-map (kbd "C-x C-p") project-prefix-map)
 
-(global-set-key (kbd "C-x k") 'kill-current-buffer)
-(global-set-key (kbd "C-x C-k") 'kill-current-buffer)
+(global-set-key (kbd "C-x k") #'kill-current-buffer)
+(global-set-key (kbd "C-x C-k") #'kill-current-buffer)
+
+(defun split-below-with-clone ()
+  (interactive)
+  (split-window-below)
+  (other-window 1)
+  (clone-indirect-buffer (buffer-name) t))
+
+(defun split-right-with-clone ()
+  (interactive)
+  (split-window-right)
+  (other-window 1)
+  (clone-indirect-buffer (buffer-name) t))
+
+(global-set-key (kbd "C-x 2") #'split-below-with-clone)
+(global-set-key (kbd "C-x 3") #'split-right-with-clone)
 
 (global-set-key (kbd "M-?") 'xref-find-references)
 ;; 加快弹出框显示
