@@ -108,9 +108,14 @@
 (require 'init-nxml)
 (require 'init-html)
 (require 'init-css)
+
 (when (require 'init-vue nil 'noerror)
   (message "init-vue loaded successfully"))
-;; (require 'init-vue)
+
+;; (when (require 'init-vue3 nil 'noerror)
+;;   (message "init-vue3 loaded successfully"))
+(require 'init-java)
+
 (require 'init-haml)
 (require 'init-http)
 (require 'init-python)
@@ -161,12 +166,12 @@
 (require 'init-crux)
 (require 'init-expand-region)
 
-(when (require 'init-agent nil 'noerror)
-  (message "init-agent loaded successfully"))
+;; (when (require 'init-agent nil 'noerror)
+;;   (message "init-agent loaded successfully"))
 
 (require 'init-yasnippet)
 (require 'init-vterm)
-
+(require 'init-rass)
 
 ;; Extra packages which don't require any configuration
 ;; (require 'init-tailwindcss)

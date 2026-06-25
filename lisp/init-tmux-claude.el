@@ -71,10 +71,12 @@ If there are multiple Claude panes, prompt user to select one."
   "Send TEXT to tmux TARGET-PANE without switching focus."
   (let* ((session (my/tmux-session-name))
          (window (my/tmux-current-window))
-         (target (format "%s:%s.%s" session window target-pane))
-         (cmd (format "tmux set-buffer '%s' && tmux paste-buffer -t '%s' && tmux send-keys -t '%s' Enter"
-                      text target target)))
-    (shell-command cmd)))
+         (target (format "%s:%s.%s" session window target-pane)))
+    (with-temp-buffer
+      (insert text)
+      (shell-command-on-region (point-min) (point-max)
+        (format "tmux load-buffer -t '%s' - && tmux paste-buffer -t '%s' && tmux send-keys -t '%s' Enter"
+                target target target)))))
 
 
 ;; Core function: send region + prompt to tmux Claude
@@ -129,26 +131,6 @@ If REGION-INFO is provided, include line numbers in the context."
                         ""))
          (prompt (read-from-minibuffer "Prompt: ")))
     (my/tmux-claude-send prompt region-text file-path region-info)))
-
-;; Interactive command: send region to Claude for implementation
-(defun my/send-inspect-req-to-tmux-claude ()
-  "Send selected region to tmux Claude for inspection.
-
-Get selected region as code to inspect and send to tmux Claude
-in the other pane with a prompt to inspect the code."
-  (interactive)
-  (unless (use-region-p)
-    (error "No region selected"))
-  (let* ((file-path (when buffer-file-name (abbreviate-file-name buffer-file-name)))
-         (region-beg (region-beginning))
-         (region-end (region-end))
-         (line-beg (line-number-at-pos region-beg))
-         (line-end (line-number-at-pos region-end))
-         (region-info (format "Lines %d-%d" line-beg line-end))
-         (region-text (buffer-substring region-beg region-end))
-         (prompt "请检查和详细解释以下代码:\n"))
-    (my/tmux-claude-send prompt region-text file-path region-info)))
-
 
 ;; Bind key
 (global-set-key (kbd "C-c '") 'my/send-prompt-to-tmux-claude)

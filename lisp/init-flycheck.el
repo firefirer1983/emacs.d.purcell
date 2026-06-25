@@ -2,8 +2,9 @@
 ;;; Commentary:
 ;;; Code:
 
+(maybe-require-package 'flycheck)
+(maybe-require-package 'flycheck-eglot)
 (require 'flycheck)
-
 (require 'flycheck-eglot)
 ;; (global-flycheck-eglot-mode 1)
 (add-hook 'after-init-hook 'global-flycheck-mode)

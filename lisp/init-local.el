@@ -9,6 +9,7 @@
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 
 (add-hook 'python-ts-mode-hook #'eglot-ensure)
+;; (add-hook 'python-ts-mode-hook #'lsp-deferred)
 
 (add-hook 'typescript-ts-mode-hook #'eglot-ensure)
 
@@ -19,39 +20,80 @@
 (remove-hook 'after-init-hook 'dimmer-mode)
 
 (add-hook 'shell-mode-hook #'eglot-ensure)
-(global-set-key (kbd "C-x o") #'other-window)
-(global-set-key (kbd "C-x C-o") #'other-window)
+(global-set-key (kbd "C-x o") #'crux-other-window-or-switch-buffer)
+(global-set-key (kbd "C-x C-o") #'crux-other-window-or-switch-buffer)
 
-(global-set-key (kbd "C-j") #'join-line)
+(global-set-key (kbd "C-j") #'crux-top-join-line)
 
 (unbind-key (kbd "C-x C-p"))
 (define-key global-map (kbd "C-x C-p") project-prefix-map)
 
 (global-set-key (kbd "C-x k") #'kill-current-buffer)
 (global-set-key (kbd "C-x C-k") #'kill-current-buffer)
+(global-set-key (kbd "C-k") #'crux-smart-kill-line)
 
-(defun split-below-with-clone ()
+(global-set-key (kbd "C-j")  #'crux-top-join-line)
+
+
+;; ===================== 窗口管理 ===============================
+(defun split-and-clone-indirect (split-fn)
   (interactive)
-  (split-window-below)
+  (funcall split-fn)
   (other-window 1)
-  (clone-indirect-buffer (buffer-name) t))
+  (clone-indirect-buffer nil t))
 
-(defun split-right-with-clone ()
+;; 绑定快捷键：用lambda包装传参
+(global-set-key (kbd "C-x 2")
+                (lambda () (interactive) (split-and-clone-indirect #'split-window-below)))
+
+(global-set-key (kbd "C-x 3")
+                (lambda () (interactive) (split-and-clone-indirect #'split-window-right)))
+
+
+(defun toggle-window-split-orientation ()
+  "Toggle split between horizontal (上下) and vertical (左右) for exactly two windows."
   (interactive)
-  (split-window-right)
-  (other-window 1)
-  (clone-indirect-buffer (buffer-name) t))
+  (unless (= (count-windows) 2)
+    (user-error "Only work with exactly two windows"))
+  (let* ((win1 (selected-window))
+         (buf1 (window-buffer win1))
+         (win2 (next-window win1))
+         (buf2 (window-buffer win2))
+         ;; 判断当前是垂直分割(左右)还是水平分割(上下)
+         (is-vertical-split (window-combined-p win1 win2)))
+    ;; 合并为单窗口
+    (delete-other-windows win1)
+    (if is-vertical-split
+        ;; 当前是左右 → 切成 上下
+        (progn
+          (split-window-below)
+          (set-window-buffer (next-window) buf2))
+      ;; 当前是上下 → 切成 左右
+      (progn
+        (split-window-right)
+        (set-window-buffer (next-window) buf2)))))
 
-(global-set-key (kbd "C-x 2") #'split-below-with-clone)
-(global-set-key (kbd "C-x 3") #'split-right-with-clone)
+;; 绑定快捷键，示例用 F9，可自行修改
+(global-set-key (kbd "C-c w w") #'toggle-window-split-orientation)
 
-(global-set-key (kbd "M-?") 'xref-find-references)
+;;
+(global-set-key (kbd "M-?") #'xref-find-references)
 ;; 加快弹出框显示
+
+
+;; CORFU 定制化
 (setq corfu-auto-delay 0.1)
 
 ;; 可选：设置补全菜单消失的延时（闲置多久后关闭）
 (setq corfu-auto-prefix 1)
 
+;; (when (maybe-require-package 'prescient)
+;;   (require 'prescient))
+
+;; (when (maybe-require-package 'corfu-prescient)
+;;   (require 'corfu-prescient)
+;;   (corfu-prescient-mode t))
+;;
 ;; 函数内部不需要做颜色提示了
 (setq treesit-font-lock-level 3)
 
@@ -156,8 +198,12 @@
 ;;                `((python-ts-mode python-mode) . ("ty" "server"))))
 
 (with-eval-after-load 'eglot
+  ;; (setq eglot-server-programs (cl-remove-if (lambda (x)
+  ;;                                             (and (consp x)
+  ;;                                                  (equal (car x) '(python-mode python-ts-mode))))
+  ;;                                           eglot-server-programs))
   (add-to-list 'eglot-server-programs
-               `((python-ts-mode python-mode) . ("pyrefly" "lsp"))))
+               `((python-mode python-ts-mode) . ("pyrefly" "lsp"))))
 
 
 ;; (with-eval-after-load 'eglot
@@ -168,6 +214,7 @@
 ;;   (add-to-list 'eglot-server-programs
 ;;                `((python-ts-mode python-mode) . ("pyright-langserver" "--stdio"))))
 
+(add-hook 'eglot-managed-mode-hook (lambda () (global-flycheck-eglot-mode t)))
 ;; ==================== GO Setting ==============================
 (add-hook 'go-ts-mode-hook (lambda () (progn (setq tab-width 4)
                                              (add-hook 'before-save-hook #'eglot-format-buffer)
@@ -240,7 +287,7 @@
           (set-window-buffer (next-window) next-window-buffer)
           (switch-to-buffer current-window-buffer))))))
 
-(add-hook 'window-size-change-functions 'my-auto-split-window)
+;; (add-hook 'window-size-change-functions 'my-auto-split-window)
 
 ;;;; global-auto-revert-mode
 (setq global-auto-revert-mode t)
@@ -304,6 +351,16 @@
                    (?v "Variable"  font-lock-variable-name-face)
                    (?m "Method"    font-lock-function-name-face)
                    (?s "Struct"    font-lock-type-face)))))
+
+;; ===================== buffer to pdf =========================
+(unless (package-installed-p 'buffer-to-pdf)
+  (package-vc-install "https://github.com/protesilaos/buffer-to-pdf.git"))
+(require 'buffer-to-pdf)
+(setq buffer-to-pdf-directory (expand-file-name "~/export-pdf"))
+
+
+(setq org-plantuml-jar-path "~/plantuml.jar")
+(desktop-save-mode nil)
 
 
 (provide 'init-local)
