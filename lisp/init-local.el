@@ -31,6 +31,7 @@
 (global-set-key (kbd "C-x k") #'kill-current-buffer)
 (global-set-key (kbd "C-x C-k") #'kill-current-buffer)
 (global-set-key (kbd "C-k") #'crux-smart-kill-line)
+(global-set-key (kbd "C-a") #'crux-move-beginning-of-line)
 
 (global-set-key (kbd "C-j")  #'crux-top-join-line)
 
@@ -351,6 +352,19 @@
                    (?v "Variable"  font-lock-variable-name-face)
                    (?m "Method"    font-lock-function-name-face)
                    (?s "Struct"    font-lock-type-face)))))
+
+;; ===================== 自动回车换行 =========================
+;; 全局开启软换行
+(global-visual-line-mode 1)
+;; 在单词边界换行，不劈断英文
+(setq-default word-wrap t)
+;; 折行后缩进对齐上一行（美观）
+(setq visual-wrap-extra-indent 2)
+;; Emacs30 美化折行前缀
+(when (>= emacs-major-version 30)
+  (global-visual-wrap-prefix-mode 1))
+;; 分栏小窗口也保持换行，不截断
+(setq truncate-partial-width-windows nil)
 
 ;; ===================== buffer to pdf =========================
 (unless (package-installed-p 'buffer-to-pdf)
