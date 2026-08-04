@@ -2,6 +2,22 @@
 ;;; Commentary:
 ;;; Code:
 
+;; 终端24色强制启用（双重保险）
+
+(when (display-graphic-p) nil
+
+  (setq display-true-color t)
+
+  ;; 允许终端使用原生RGB颜色
+
+  (setq xterm-use-true-color t))
+
+
+
+;; 可选：关闭主题自动降级
+
+(setq modus-themes-italic-constructs t)
+
 
 ;; 默认要用eglot
 (require 'eglot)
@@ -11,7 +27,8 @@
 (add-hook 'python-ts-mode-hook #'eglot-ensure)
 ;; (add-hook 'python-ts-mode-hook #'lsp-deferred)
 
-(add-hook 'typescript-ts-mode-hook #'eglot-ensure)
+;; (add-hook 'typescript-ts-mode-hook #'eglot-ensure)
+;; (add-hook 'typescript-ts-mode-hook (lambda () (setq-local tab-width 2)))
 
 ;; 不要多余的行的提示导致显示错位
 (remove-hook 'after-init-hook 'global-diff-hl-mode)
@@ -199,10 +216,6 @@
 ;;                `((python-ts-mode python-mode) . ("ty" "server"))))
 
 (with-eval-after-load 'eglot
-  ;; (setq eglot-server-programs (cl-remove-if (lambda (x)
-  ;;                                             (and (consp x)
-  ;;                                                  (equal (car x) '(python-mode python-ts-mode))))
-  ;;                                           eglot-server-programs))
   (add-to-list 'eglot-server-programs
                `((python-mode python-ts-mode) . ("pyrefly" "lsp"))))
 
@@ -376,6 +389,28 @@
 (setq org-plantuml-jar-path "~/plantuml.jar")
 (desktop-save-mode nil)
 
+(when (maybe-require-package 'nerd-icons)
+  (require 'nerd-icons)
+  (setq nerd-icons-font-family "Maple Mono NF"))
+
+(when (maybe-require-package 'nerd-icons-dired)
+  (require 'nerd-icons-dired)
+  (add-hook 'dired-mode-hook #'nerd-icons-dired-mode))
+
 
 (provide 'init-local)
 ;;; init-local.el ends here
+
+;; ;; 强制终端Emacs减少增量刷新bug
+;; (when (not (display-graphic-p))
+;;   ;; 关闭增量滚动优化，牺牲轻微流畅度消除黑块
+;;   (setq fast-scroll nil)
+;;   ;; 开启强制背景擦除，滚动时填充空白区域
+;;   (setq terminal-erase-bkg t)
+;;   ;; 避免滚动区域(scroll-region)计算异常
+;;   (setq scroll-preserve-screen-position nil)
+;;   ;; 可选：高速翻页自动触发一次完整重绘（根治残块）
+;;   (defadvice recenter (after full-redraw-after-recenter activate)
+;;     (when (> (abs (- (window-start) (window-end))) 10)
+;;       (redraw-frame (selected-frame))))
+;;   )

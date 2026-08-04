@@ -173,8 +173,6 @@
 (require 'init-vterm)
 (require 'init-rass)
 
-;; Extra packages which don't require any configuration
-;; (require 'init-tailwindcss)
 
 (require-package 'sudo-edit)
 (maybe-require-package 'gnuplot)
