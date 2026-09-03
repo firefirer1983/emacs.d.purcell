@@ -22,12 +22,9 @@
 ;; 默认要用eglot
 (require 'eglot)
 
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 
 (add-hook 'python-ts-mode-hook #'eglot-ensure)
-;; (add-hook 'python-ts-mode-hook #'lsp-deferred)
 
-;; (add-hook 'typescript-ts-mode-hook #'eglot-ensure)
 ;; (add-hook 'typescript-ts-mode-hook (lambda () (setq-local tab-width 2)))
 
 ;; 不要多余的行的提示导致显示错位
