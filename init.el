@@ -109,11 +109,14 @@
 (require 'init-html)
 (require 'init-css)
 
-(when (require 'init-vue nil 'noerror)
-  (message "init-vue loaded successfully"))
+;; (when (require 'init-vue nil 'noerror)
+;;   (message "init-vue loaded successfully"))
 
-;; (when (require 'init-vue3 nil 'noerror)
-;;   (message "init-vue3 loaded successfully"))
+(when (require 'init-lsp nil 'noerror)
+  (message "init-lsp loaded successfully"))
+
+;; (when (require 'init-eglotx nil 'noerror)
+;;   (message "init-eglotx loaded successfully"))
 (require 'init-java)
 
 (require 'init-haml)
@@ -171,7 +174,6 @@
 
 (require 'init-yasnippet)
 (require 'init-vterm)
-(require 'init-rass)
 
 
 (require-package 'sudo-edit)

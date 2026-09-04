@@ -37,41 +37,31 @@
   (setq web-mode-script-padding 0)
   )
 
-;; ;; 2. 配置 lsp-mode 核心
-;; (use-package lsp-mode
-;;   :hook ((web-mode . lsp-deferred)) ; 当打开 .vue 文件时延迟启动 lsp
-;;   :commands (lsp lsp-deferred)
-;;   :config
-;;   ;; 针对 Vue 3 (Volar v2+) 启用必要的 Hybrid 模式与 Add-on 机制
-;;   (add-to-list 'lsp-language-id-configuration '(".*\\.mjs$" . "javascript"))
-;;   (setq lsp-enable-text-document-color nil)
-;;   (lsp-enable-which-key-integration t)
-;;   (setq-default lsp-enable-indentation nil)
-;;   (lsp-register-custom-settings
-;;    '(("volar.inlayHints.missingArguments" t))))
-
 
 (use-package emmet-mode
   :hook ((web-mode . emmet-mode))
   :ensure t)
 
-
-(require 'eglot-typescript-preset)
-
-;; With rass backend (default), combining these tools:
-(setopt eglot-typescript-preset-vue-lsp-server 'rass)
-(setopt eglot-typescript-preset-vue-rass-tools
-        '(vue-language-server typescript-language-server
-                              tailwindcss-language-server))
-;; rass 会自动查找 tsdk（项目 node_modules/typescript/lib 优先，
-;; 其次 npm root -g）；这里仅作为两者都不可用时的全局兜底。
-(setopt eglot-typescript-preset-tsdk
-        "/home/xy/.nvm/versions/node/v22.14.0/lib/node_modules/typescript/lib")
-
-
 (add-to-list 'eglot-server-programs
-             '((js-mode js-ts-mode tsx-ts-mode typescript-ts-mode
-                        jtsx-jsx-mode jtsx-tsx-mode jtsx-typescript-mode)
-               "typescript-language-server" "--stdio"))
+             '(vue-ts-mode . ("vue-language-server" "--stdio")))
+;; (require 'eglot-typescript-preset)
+
+;; (setopt eglot-typescript-preset-vue-lsp-server 'rass)
+;; (setopt eglot-typescript-preset-vue-rass-tools
+;;         '(vue-language-server tailwindcss-language-server))
+
+
+;; (setopt eglot-typescript-preset-tsdk
+;;         "/home/xy/.nvm/versions/node/v22.14.0/lib/node_modules/typescript/lib")
+
+
+;; (add-to-list 'eglot-server-programs
+;;              '((js-mode js-ts-mode tsx-ts-mode typescript-ts-mode
+;;                         jtsx-jsx-mode jtsx-tsx-mode jtsx-typescript-mode)
+;;                "typescript-language-server" "--stdio"))
+
+;; (setopt eglot-typescript-preset-css-lsp-server 'rass)
+;; (setopt eglot-typescript-preset-css-rass-tools
+;;         '(vscode-css-language-server tailwindcss-language-server))
 
 ;;; init-vue.el ends here
