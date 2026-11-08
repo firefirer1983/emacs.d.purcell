@@ -14,6 +14,13 @@
 ;; 因此在 html-ts-mode 启动后再切换回 web-mode。
 ;; (add-hook 'html-ts-mode-hook #'web-mode)
 
+;; (defun my-project-root-with-node-modules (dir)
+;;   (let ((root (locate-dominating-file dir "node_modules")))
+;;     (when root (cons 'transient root))))
+
+;; (add-to-list 'project-find-functions #'my-project-root-with-node-modules)
+;; (expand-file-name "node_modules/typescript/lib" (project-root (project-current)))
+
 
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
@@ -42,8 +49,9 @@
   :hook ((web-mode . emmet-mode))
   :ensure t)
 
-(add-to-list 'eglot-server-programs
-             '(vue-ts-mode . ("vue-language-server" "--stdio")))
+;; (add-to-list 'eglot-server-programs
+;;              '(vue-ts-mode . ("vue-language-server" "--stdio")))
+
 ;; (require 'eglot-typescript-preset)
 
 ;; (setopt eglot-typescript-preset-vue-lsp-server 'rass)

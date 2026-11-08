@@ -394,6 +394,12 @@
   (require 'nerd-icons-dired)
   (add-hook 'dired-mode-hook #'nerd-icons-dired-mode))
 
+(when (maybe-require-package 'valign)
+  (require 'valign)
+  (add-hook 'org-mode-hook #'valign-mode)
+  (add-hook 'markdown-mode-hook #'valign-mode))
+
+
 
 (provide 'init-local)
 ;;; init-local.el ends here

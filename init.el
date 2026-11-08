@@ -109,11 +109,11 @@
 (require 'init-html)
 (require 'init-css)
 
-;; (when (require 'init-vue nil 'noerror)
-;;   (message "init-vue loaded successfully"))
+(when (require 'init-vue nil 'noerror)
+  (message "init-vue loaded successfully"))
 
-(when (require 'init-lsp nil 'noerror)
-  (message "init-lsp loaded successfully"))
+;; (when (require 'init-lsp nil 'noerror)
+;;   (message "init-lsp loaded successfully"))
 
 ;; (when (require 'init-eglotx nil 'noerror)
 ;;   (message "init-eglotx loaded successfully"))
